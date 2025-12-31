@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Település kopogtató felelősök útmutatója</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e3a8a 100%);
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .progress-container {
+            margin-top: 16px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80 0%, #16a34a 100%);
+            transition: width 0.3s ease;
+            border-radius: 999px;
+        }
+
+        .category-section {
+            margin-bottom: 24px;
+        }
+
+        .category-title {
+            font-size: 30px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            padding: 0 8px;
+        }
+
+        .step-card {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .step-card:active {
+            transform: scale(0.98);
+        }
+
+        .step-header {
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #9ca3af;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox.checked {
+            background: #16a34a;
+            border-color: #16a34a;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .step-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .step-number {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 28px;
+            line-height: 1.4;
+        }
+
+        .step-title.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .step-description {
+            color: #374151;
+            font-size: 24px;
+            line-height: 1.6;
+            margin-top: 12px;
+            padding-right: 8px;
+            display: none;
+        }
+
+        .step-description.visible {
+            display: block;
+        }
+
+        .expand-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .footer {
+            background: linear-gradient(90deg, #ffffff 0%, #ffffff 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+
+        .footer h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .footer p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Category colors */
+        .cat-elokeszites { background: #dbeafe; border-color: #93c5fd; }
+        .cat-csapatszervezes { background: #dcfce7; border-color: #86efac; }
+        .cat-dokumentumok { background: #f3e8ff; border-color: #d8b4fe; }
+        .cat-logisztika { background: #fed7aa; border-color: #fdba74; }
+        .cat-helyszini { background: #fef3c7; border-color: #fcd34d; }
+        .cat-lezaras { background: #fce7f3; border-color: #f9a8d4; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1 style="margin: 0;">Település kopogtató felelősök útmutatója</h1>
+    <img 
+        src="data:image/jpeg;base64,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" 
+        alt="Logó" 
+        style="height: 80px; margin-left: 20px;"
+    />
+</div>
+
+            <p>
+				Készítette: Györe-Szűcs Sándor v.2.1
+			</p>
+            
+            
+			
+			<div class="progress-container">
+                <div class="progress-label">
+                    <span>Haladás</span>
+                    <span id="progressText">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Előkészítés -->
+        <div class="category-section">
+            <h2 class="category-title">Előkészítés</h2>
+            
+            <div class="step-card cat-elokeszites" data-step="1">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(1, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">1. lépés</div>
+                        <h3 class="step-title">Kampánycsapattal egyeztetés</h3>
+                        <p class="step-description">Egyeztessen a kampánycsapattal, hogy pontosan mely szavazókörökben, mikor és hány fővel induljon a kopogtatás. Így mindenki magabiztosan, tiszta tervvel vághat neki a napnak.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-elokeszites" data-step="2">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(2, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">2. lépés</div>
+                        <h3 class="step-title">Létszám ellenőrzés</h3>
+                        <p class="step-description">Nézze meg az applikációban, hogy az adott területhez minimum hány fő szükséges. Ez segít abban, hogy a csapat hatékonyan, jó tempóban tudjon haladni.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Csapatszervezés -->
+        <div class="category-section">
+            <h2 class="category-title">Csapatszervezés</h2>
+            
+            <div class="step-card cat-csapatszervezes" data-step="3">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(3, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">3. lépés</div>
+                        <h3 class="step-title">Párok kialakítása</h3>
+                        <p class="step-description">Állítsa össze a kopogtató párokat úgy, hogy mindenki olyan társ mellé kerüljön, akivel örömmel és lendülettel dolgozik együtt. A jó párosítás fél siker.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-csapatszervezes" data-step="4">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(4, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">4. lépés</div>
+                        <h3 class="step-title">Területek kijelölése</h3>
+                        <p class="step-description">Jelölje ki, melyik pár melyik területet járja be. A világos feladatmegosztás biztonságot ad, és növeli a csapat önbizalmát.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dokumentumok -->
+        <div class="category-section">
+            <h2 class="category-title">Dokumentumok</h2>
+            
+            <div class="step-card cat-dokumentumok" data-step="5">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(5, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">5. lépés</div>
+                        <h3 class="step-title">Térképek előkészítése</h3>
+                        <p class="step-description">Nyomtassa ki vagy küldje el a térképrészleteket, hogy a kopogtatók pontosan tudják, merre induljanak. A magabiztos tájékozódás sokat dob a hangulaton.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-dokumentumok" data-step="6">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(6, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">6. lépés</div>
+                        <h3 class="step-title">Adatvédelmi tájékoztató</h3>
+                        <p class="step-description">Töltse ki az adatvédelmi tájékoztatót, és gondoskodjon róla, hogy minden párnál legyen egy példány. A rendezett háttérmunka erősíti a profizmust.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-dokumentumok" data-step="7">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(7, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">7. lépés</div>
+                        <h3 class="step-title">Adatgyűjtő lapok</h3>
+                        <p class="step-description">Készítse elő az adatgyűjtő és kontaktlapokat, és adja oda a pároknak. A megfelelő mennyiségű eszköz gördülékennyé teszi a munkát.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-dokumentumok" data-step="8">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(8, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">8. lépés</div>
+                        <h3 class="step-title">Korábbi kontaktlapok</h3>
+                        <p class="step-description">Ha egy területhez már van korábbi kontaktlap, adja vissza a kopogtatóknak, hogy ott folytathassák, ahol az előző csapat abbahagyta. Ez folyamatosságot és hatékonyságot teremt.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logisztika -->
+        <div class="category-section">
+            <h2 class="category-title">Logisztika</h2>
+            
+            <div class="step-card cat-logisztika" data-step="9">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(9, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">9. lépés</div>
+                        <h3 class="step-title">Találkozási pontok</h3>
+                        <p class="step-description">A kopogtatás előtt tervezze meg, hol teszik ki a csoportokat, és hol lesz a közös találkozási pont. Ha szükséges, jelöljön ki autós találkozókat is, hogy mindenki energiát spórolhasson.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-logisztika" data-step="10">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(10, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">10. lépés</div>
+                        <h3 class="step-title">Külterületek tervezése</h3>
+                        <p class="step-description">A külterületek esetében előre tájékozódjon a távolságokról. Ha nagyok a távok, érdemes autóval bejárni — így a csapat friss marad, és több házhoz jut el.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Helyszíni ellenőrzés -->
+        <div class="category-section">
+            <h2 class="category-title">Helyszíni ellenőrzés</h2>
+            
+            <div class="step-card cat-helyszini" data-step="11">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(11, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">11. lépés</div>
+                        <h3 class="step-title">Eszközök és szabályok</h3>
+                        <p class="step-description">A helyszínen győződjön meg róla, hogy mindenki érti a lapok kitöltésének szabályait, és minden szükséges eszköz a kezükben van. A felkészült csapat mindig magabiztosabb.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-helyszini" data-step="12">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(12, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">12. lépés</div>
+                        <h3 class="step-title">Öltözet ellenőrzése</h3>
+                        <p class="step-description">Ellenőrizze, hogy a kopogtatók öltözete rendezett, ápolt és időjárásnak megfelelő. A jó megjelenés erősíti a hitelességet és a pozitív fogadtatást.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-helyszini" data-step="13">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(13, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">13. lépés</div>
+                        <h3 class="step-title">Illemhely jelzése</h3>
+                        <p class="step-description">Ha lehetséges, jelezze a csapatnak, hol található a környéken illemhely. Egy apró figyelmesség, ami sokat számít a komfortérzetben.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lezárás -->
+        <div class="category-section">
+            <h2 class="category-title">Lezárás</h2>
+            
+            <div class="step-card cat-lezaras" data-step="14">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(14, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">14. lépés</div>
+                        <h3 class="step-title">Lapok összegyűjtése</h3>
+                        <p class="step-description">A kopogtatás végén gyűjtse össze a lapokat, és küldje tovább a szükséges íveket a központba. A pontos adminisztráció a kampány egyik motorja.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-lezaras" data-step="15">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(15, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">15. lépés</div>
+                        <h3 class="step-title">Köszönet és elismerés</h3>
+                        <p class="step-description">A nap végén köszönje meg a kopogtatók munkáját. Egy kedves szó, egy mosoly, egy közös öröm-pillanat rengeteget ad a csapat lelkesedéséhez. Engedje, hogy érezzék: fontosak, értékesek, és számít a munkájuk.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="step-card cat-lezaras" data-step="16">
+                <div class="step-header">
+                    <div class="checkbox" onclick="toggleCheck(16, event)"></div>
+                    <div class="step-content">
+                        <div class="step-number">16. lépés</div>
+                        <h3 class="step-title">Jelentés koordinátornak</h3>
+                        <p class="step-description">Végül jelezze az OEVK kopogtató koordinátornak az elvégzett munkát — így mindenki látja, milyen nagy lépést tett a csapat előre.</p>
+                    </div>
+                    <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+			  <h3 class="step-title"><br>Minden lépés közelebb visz a célhoz.<br></h3> 
+			  
+			   <h3 class="step-title"></h3>
+<h1 class="step-title">
+  <br>
+  <a href="https://www.youtube.com/watch?v=7eM_73plblw&list=PLj0XN8wTrBc-4Dm5VkIDS2gwiX8OFh1yb" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     style="color: #dc2626; text-decoration: underline; cursor: pointer;">
+    🎥 Együtt Egyéségben Sikerülni fog!
+  </a>
+  <br>
+</h1>
+			  <h3 class="step-title"><br>Köszönjük a munkádat! 🙌<br><br></h3> 
+           
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let checkedSteps = {};
+        const totalSteps = 16;
+
+        // Load saved state
+        function loadState() {
+            const saved = localStorage.getItem('kopogtatasi-utmutato');
+            if (saved) {
+                checkedSteps = JSON.parse(saved);
+                Object.keys(checkedSteps).forEach(step => {
+                    if (checkedSteps[step]) {
+                        const card = document.querySelector(`[data-step="${step}"]`);
+                        if (card) {
+                            const checkbox = card.querySelector('.checkbox');
+                            const title = card.querySelector('.step-title');
+                            checkbox.classList.add('checked');
+                            title.classList.add('completed');
+                        }
+                    }
+                });
+                updateProgress();
+            }
+        }
+
+        // Save state
+        function saveState() {
+            localStorage.setItem('kopogtatasi-utmutato', JSON.stringify(checkedSteps));
+        }
+
+        // Toggle checkbox
+        function toggleCheck(step, event) {
+            event.stopPropagation();
+            checkedSteps[step] = !checkedSteps[step];
+            
+            const card = document.querySelector(`[data-step="${step}"]`);
+            const checkbox = card.querySelector('.checkbox');
+            const title = card.querySelector('.step-title');
+            
+            if (checkedSteps[step]) {
+                checkbox.classList.add('checked');
+                title.classList.add('completed');
+            } else {
+                checkbox.classList.remove('checked');
+                title.classList.remove('completed');
+            }
+            
+            updateProgress();
+            saveState();
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const checked = Object.values(checkedSteps).filter(Boolean).length;
+            const percentage = Math.round((checked / totalSteps) * 100);
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = percentage + '%';
+        }
+
+        // Toggle expand/collapse
+        document.querySelectorAll('.step-header').forEach(header => {
+            header.addEventListener('click', function(e) {
+                if (e.target.classList.contains('checkbox') || e.target.closest('.checkbox')) {
+                    return;
+                }
+                
+                const description = this.querySelector('.step-description');
+                const icon = this.querySelector('.expand-icon');
+                
+                description.classList.toggle('visible');
+                icon.classList.toggle('expanded');
+            });
+        });
+
+        // Initialize
+        loadState();
+    </script>
+</body>
+</html>
